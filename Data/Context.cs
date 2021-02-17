@@ -14,7 +14,9 @@ namespace Data
         public DbSet<Contacts> Contacts { get; set; }
         public DbSet<Employees> Employees { get; set; }
         public DbSet<Intakes> Intakes { get; set; }
+        public DbSet<LocationLkp> Locations { get; set; }
         public DbSet<ProgramLkp> Programs { get; set; }
         public DbSet<ProgressNotes> Notes { get; set; }
+        public DbSet<ServiceCodes> ServiceCodes { get; set; }
     }
 }
