@@ -15,7 +15,9 @@ namespace Domain
         public string ProgressNote { get; set; }
         public DateTime DateSigned { get; set; }
         public int ContactKeyId { get; set; }
+        [ForeignKey("ClientId")]
         public Client Client { get; set; }
+        [ForeignKey("ContactKeyId")]
         public Contacts Contact { get; set; }
     }
 }

@@ -17,9 +17,13 @@ namespace Domain
         public int CaseMgr { get; set; }
         public DateTime InitDate { get; set; }
         public DateTime TermDate { get; set; }
+        [ForeignKey("ClientId")]
         public Client Client { get; set; }
+        [ForeignKey("Program")]
         public ProgramLkp ProgramLkp { get; set; }
+        [ForeignKey("CaseMgr")]
         public Employees CaseMgrEmployee { get; set; }
+        [ForeignKey("IntakeKey")]
         public List<Contacts> Contacts { get; set; }
     }
 }

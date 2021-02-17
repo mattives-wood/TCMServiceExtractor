@@ -15,9 +15,11 @@ namespace Domain
         public string FirstName { get; set; }
         public string MiddleInitial { get; set; }
         public string LastFirstName { get; set; }
-
+        [ForeignKey("ClientId")]
         public List<Intakes> Intakes { get; set; }
+        [ForeignKey("ClientId")]
         public List<Contacts> Contacts { get; set; }
+        [ForeignKey("ClientId")]
         public List<ProgressNotes> ProgressNotes { get; set; }
     }
 }

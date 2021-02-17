@@ -12,6 +12,7 @@ namespace Domain
         [Key]
         public int Code { get; set; }
         public string Description { get; set; }
+        [ForeignKey("Activity")]
         public List<Contacts> Contacts { get; set; }
     }
 }

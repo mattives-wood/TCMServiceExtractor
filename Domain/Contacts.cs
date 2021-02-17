@@ -41,15 +41,25 @@ namespace Domain
         public decimal BillableTime { get; set; }
         public int SignedByStaffId { get; set; }
         public DateTime SignedByDate { get; set; }
+        [ForeignKey("ClientId")]
         public Client Client { get; set; }
+        [ForeignKey("Program")]
         public ProgramLkp ProgramLkp { get; set; }
+        [ForeignKey("ProgressNoteKey")]
         public ProgressNotes ProgressNotes { get; set; }
+        [ForeignKey("IntakeKey")]
         public Intakes Intake { get; set; }
+        [ForeignKey("Location")]
         public LocationLkp LocationLkp { get; set; }
+        [ForeignKey("Activity")]
         public ServiceCodes ServiceCode { get; set; }
+        [ForeignKey("StaffId")]
         public Employees StaffEmployee { get; set; }
+        [ForeignKey("EntryStaffId")]
         public Employees EntryStaffEmployee { get; set; }
+        [ForeignKey("CreateStaffId")]
         public Employees CreateStaffEmployee { get; set; }
+        [ForeignKey("SignedByStaffId")]
         public Employees SignedByStaffEmployee { get; set; }
 
     }
