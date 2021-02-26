@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace Domain
 {
@@ -15,23 +16,23 @@ namespace Domain
         public int IntakeKey { get; set; }
         public int ClientId { get; set; }
         public int StaffId { get; set; }
-        public DateTime ServDate { get; set; }
+        public DateTime? ServDate { get; set; }
         public int Mileage { get; set; }
         public decimal TimeSpent { get; set; }
         public int EntryStaffId { get; set; }
         public string ClientLast { get; set; }
         public string ClientFirst { get; set; }
-        public DateTime ClientDOB { get; set; }
+        public DateTime? ClientDOB { get; set; }
         public int Activity { get; set; }
         public int Location { get; set; }
         public int Program { get; set; }
         public int CreateStaffId { get; set; }
         public string CreateName { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; }
         public string ProviderLast { get; set; }
         public string ProviderFirst { get; set; }
         public decimal TravelTime { get; set; }
-        public bool ContactSigned { get; set; }
+        public int ContactSigned { get; set; }
         public decimal FaceToFace { get; set; }
         public decimal OtherContactType { get; set; }
         public decimal Collateral { get; set; }
@@ -40,7 +41,7 @@ namespace Domain
         public decimal Travel { get; set; }
         public decimal BillableTime { get; set; }
         public int SignedByStaffId { get; set; }
-        public DateTime SignedByDate { get; set; }
+        public DateTime? SignedByDate { get; set; }
         [ForeignKey("ClientId")]
         public Client Client { get; set; }
         [ForeignKey("Program")]
