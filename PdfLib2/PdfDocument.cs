@@ -2,24 +2,26 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 
 using Domain;
 
 using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Fields;
-using MigraDoc.DocumentObjectModel.Shapes;
-using MigraDoc.DocumentObjectModel.Shapes.Charts;
-using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
 
 namespace PdfLib
 {
     public class PDFDocument
     {
-        public PDFDocument() { }
+        private readonly string _path;
+        private readonly string _metadataFile;
+        private readonly string _extension = "pdf";
+
+        public PDFDocument(string path, string metadataFile) 
+        {
+            _path = path;
+            _metadataFile = metadataFile;
+        }
 
         public void GeneratePdf(Client client, Mode mode)
         {
@@ -42,6 +44,15 @@ namespace PdfLib
 
         private void RenderSingle(Client client)
         {
+            string path = $"{_path}\\{client.ClientId}";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            List<Metadata> metas = new List<Metadata>();
+            int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
+
             foreach (Contacts contact in client.Contacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -51,20 +62,79 @@ namespace PdfLib
                 ProcessServiceInfo(doc, new List<Contacts> { contact });
                 PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
                 renderer.Document = doc;
-                renderer.RenderDocument();
-                string path = $"C:\\testpdfs\\{client.ClientId}";
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filename = $"{path}\\{contact.ServDate.Value.ToString("yyyyMMdd-HHmmss")}-{contact.ServiceCode.Code}-{contact.KeyId}.pdf";
-                renderer.PdfDocument.Save(filename);
+                renderer.RenderDocument();                
+                string filename = $"{contact.ServDate.Value.ToString("yyyy-MM-dd+HH-mm-ss")}+{contact.ServiceCode.Code}+{contact.KeyId}";
+                
+                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
+
+                metas.Add(
+                    new Metadata()
+                    {
+                        EffectiveDate = contact.ServDate.Value.ToShortDateString(),
+                        LegacyDocumentId = ++lastSeqNum,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = filename,
+                        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    });
             }
+            
+            Csv.WriteCsvFile(metas, _metadataFile);
         }
 
         private void RenderDaily(Client client)
         {
+            string path = $"{_path}\\{client.ClientId}";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
             IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => c.ServDate.Value.Date);
+            List<Metadata> metas = new List<Metadata>();
+            int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
+
+            foreach (IGrouping<DateTime, Contacts> group in contacts)
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                Document doc = new Document();
+                DefineStyles(doc);
+                DefineContentSection(doc, client);
+                ProcessServiceInfo(doc, group.ToList());
+                PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
+                renderer.Document = doc;
+                renderer.RenderDocument();                
+                string filename = $"{group.Key.ToString("yyyy-MM-dd")}";
+                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
+
+                metas.Add(
+                    new Metadata()
+                    {
+                        EffectiveDate = contacts.First().First().ServDate.Value.ToShortDateString(),
+                        LegacyDocumentId = ++lastSeqNum,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = filename,
+                        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    });
+            }
+
+            Csv.WriteCsvFile(metas, _metadataFile);
+        }
+
+        private void RenderMonthly(Client client)
+        {
+            string path = $"{_path}\\{client.ClientId}";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year,c.ServDate.Value.Month,01));
+            List<Metadata> metas = new List<Metadata>();
+            int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
             foreach (IGrouping<DateTime, Contacts> group in contacts)
             {
@@ -76,45 +146,39 @@ namespace PdfLib
                 PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
                 renderer.Document = doc;
                 renderer.RenderDocument();
-                string path = $"C:\\testpdfs\\{client.ClientId}";
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filename = $"{path}\\{group.Key.ToString("yyyyMMdd-HHmmss")}.pdf";
-                renderer.PdfDocument.Save(filename);
-            }
-        }
+                string filename = $"{group.Key.ToString("yyyy-MM")}";
+                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-        private void RenderMonthly(Client client)
-        {
-            var contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year,c.ServDate.Value.Month,01));
-
-            foreach (var group in contacts)
-            {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                Document doc = new Document();
-                DefineStyles(doc);
-                DefineContentSection(doc, client);
-                ProcessServiceInfo(doc, group.ToList());
-                PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
-                renderer.Document = doc;
-                renderer.RenderDocument();
-                string path = $"C:\\testpdfs\\{client.ClientId}";
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filename = $"{path}\\{group.Key.ToString("yyyyMM")}.pdf";
-                renderer.PdfDocument.Save(filename);
+                DateTime effectiveDate = new DateTime(contacts.First().First().ServDate.Value.Year, contacts.First().First().ServDate.Value.Month, 1);
+                metas.Add(
+                    new Metadata()
+                    {
+                        EffectiveDate = effectiveDate.ToShortDateString(),
+                        LegacyDocumentId = ++lastSeqNum,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = filename,
+                        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    });
             }
+
+            Csv.WriteCsvFile(metas, _metadataFile);
         }
 
         private void RenderYearly(Client client)
         {
-            var contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
+            string path = $"{_path}\\{client.ClientId}";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
 
-            foreach (var group in contacts)
+            IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
+            List<Metadata> metas = new List<Metadata>();
+            int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
+
+            foreach (IGrouping<DateTime, Contacts> group in contacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Document doc = new Document();
@@ -124,14 +188,24 @@ namespace PdfLib
                 PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
                 renderer.Document = doc;
                 renderer.RenderDocument();
-                string path = $"C:\\testpdfs\\{client.ClientId}";
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filename = $"{path}\\{group.Key.ToString("yyyy")}.pdf";
-                renderer.PdfDocument.Save(filename);
+                string filename = $"{group.Key.ToString("yyyy")}";
+                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
+
+                DateTime effectiveDate = new DateTime(contacts.First().First().ServDate.Value.Year,1,1);
+                metas.Add(
+                    new Metadata()
+                    {
+                        EffectiveDate = effectiveDate.ToShortDateString(),
+                        LegacyDocumentId = ++lastSeqNum,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = filename,
+                        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    });
             }
+
+            Csv.WriteCsvFile(metas, _metadataFile);
         }
 
         private void ProcessServiceInfo(Document doc, List<Contacts> contacts)
@@ -153,6 +227,7 @@ namespace PdfLib
                 sb.Append($"\nEntered by:\t{contact.EntryStaffEmployee.LastName}, {contact.EntryStaffEmployee.FirstName}");
                 sb.Append($"\nEntered on:\t{contact.CreateDate}");
                 sb.Append($"\nSigned on:\t{contact.SignedByDate}");
+                sb.Append($"\nSigned by:\t{contact.SignedByStaffEmployee.LastName}, {contact.SignedByStaffEmployee.FirstName}");
                 sb.Append($"\nTotal duration:\t{contact.TimeSpent}");
                 sb.Append($"\nFace to face duration:\t{contact.FaceToFace}");
                 sb.Append($"\nOther consumer contact duration:\t{contact.OtherContactType}");
@@ -167,7 +242,7 @@ namespace PdfLib
 
                 paragraph = doc.LastSection.AddParagraph();
                 paragraph.Style = "ServiceText";
-                paragraph.AddText(contact.ProgressNotes.ProgressNote.Replace("\r", "\n"););
+                paragraph.AddText(contact.ProgressNotes.ProgressNote.Replace("\r", "\n"));
             }
         }
 
