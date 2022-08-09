@@ -40,9 +40,6 @@ namespace App
 
         public void Run()
         {
-            //ExpressionPredicateBuilder.Test test = new ExpressionPredicateBuilder.Test();
-            //test.Run();
-
             int? ClientId = _config.GetSection("Parameters").GetValue<int?>("ClientId");
             DateTime StartDate = _config.GetSection("Parameters").GetValue<DateTime>("StartDate");
             DateTime EndDate = _config.GetSection("Parameters").GetValue<DateTime>("EndDate").AddDays(1).AddMilliseconds(-1);
@@ -52,14 +49,14 @@ namespace App
             List<int> programs = new List<int>();
             _config.GetSection("Parameters").GetSection("Programs").Bind(programs);
 
-            PDFDocument.Mode Mode = mode switch
-            {
-                "S" => PDFDocument.Mode.Single,
-                "D" => PDFDocument.Mode.Daily,
-                "M" => PDFDocument.Mode.Monthly,
-                "Y" => PDFDocument.Mode.Yearly,
-                _ => throw new ArgumentException("Mode is incorrectly specified")
-            };
+            //PDFDocument.Mode Mode = mode switch
+            //{
+            //    "S" => PDFDocument.Mode.Single,
+            //    "D" => PDFDocument.Mode.Daily,
+            //    "M" => PDFDocument.Mode.Monthly,
+            //    "Y" => PDFDocument.Mode.Yearly,
+            //    _ => throw new ArgumentException("Mode is incorrectly specified")
+            //};
 
             //IQueryable<Client> query = _context.Clients;
                                 //.Include(c => c.Contacts)
