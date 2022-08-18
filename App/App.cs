@@ -1,27 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.SqlTypes;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Net;
-using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
-using System.Xml.XPath;
-using System.Linq.Dynamic.Core;
-
-using Data;
+﻿using Data;
 
 using Domain;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Configuration;
 
 using PdfLib;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace App
 {
@@ -29,112 +20,119 @@ namespace App
     {
         private readonly IConfiguration _config;
         private readonly Context _context;
+        private readonly MetaContext _metaContext;
+        private readonly string _outputPath;
         
         public App(IConfiguration configuration)
         {
             _config = configuration;
             DbContextOptionsBuilder<Context> optionsBuilder = new DbContextOptionsBuilder<Context>();
-            optionsBuilder.UseSqlServer(_config.GetConnectionString("Connection"));
+            optionsBuilder.UseSqlServer(_config.GetConnectionString("TCMConnection"));
             _context = new Context(optionsBuilder.Options);
+            DbContextOptionsBuilder<MetaContext> metaOptionsBuilder = new DbContextOptionsBuilder<MetaContext>();
+            metaOptionsBuilder.UseSqlServer(_config.GetConnectionString("MetadataConnection"));
+            _metaContext = new MetaContext(metaOptionsBuilder.Options);
+            _outputPath = _config.GetValue<string>("OutputPath");
         }
 
         public void Run()
-        {
-            int? ClientId = _config.GetSection("Parameters").GetValue<int?>("ClientId");
-            DateTime StartDate = _config.GetSection("Parameters").GetValue<DateTime>("StartDate");
-            DateTime EndDate = _config.GetSection("Parameters").GetValue<DateTime>("EndDate").AddDays(1).AddMilliseconds(-1);
-            string mode = _config.GetSection("Parameters").GetValue<string>("Mode");
-            string outputPath = _config.GetValue<string>("OutputPath");
+        {            
             string metadataFile = _config.GetValue<string>("MetadataFile");
             List<int> programs = new List<int>();
             _config.GetSection("Parameters").GetSection("Programs").Bind(programs);
 
-            //PDFDocument.Mode Mode = mode switch
-            //{
-            //    "S" => PDFDocument.Mode.Single,
-            //    "D" => PDFDocument.Mode.Daily,
-            //    "M" => PDFDocument.Mode.Monthly,
-            //    "Y" => PDFDocument.Mode.Yearly,
-            //    _ => throw new ArgumentException("Mode is incorrectly specified")
-            //};
+            //Get list of ClientIDs to process
+            List<Domain.Meta.Client> clients = _metaContext.Clients.ToList();
+            //List<Domain.Meta.Client> clients = _metaContext.Clients.Where(c => c.ClientId == 101424).ToList();
+            float count = clients.Count;
+            float done = 0;
+            float percent = -1;
+            foreach (Domain.Meta.Client metaClient in clients)
+            {
+                done++;
+                Process(metaClient);
+                float tempPercent = done / count * 100;
+                if (tempPercent != percent)
+                {
+                    percent = tempPercent;
+                    Console.WriteLine($"{percent.ToString("0.00")}%");
+                }
+            }
+        }
 
-            //IQueryable<Client> query = _context.Clients;
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.StaffEmployee)
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.ServiceCode)
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.ProgramLkp)
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.LocationLkp)
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.EntryStaffEmployee)
-                                //.Include(c => c.Contacts)
-                                //.ThenInclude(c => c.SignedByStaffEmployee);
+        public void Process(Domain.Meta.Client metaClient)
+        {
+            DateTime yearlyStartDate = new DateTime(2000, 1, 1);
+            DateTime yearlyEndDate = new DateTime(2020, 1, 1).AddMilliseconds(-1);
+            DateTime monthlyStartDate = new DateTime(2020, 1, 1);
+            DateTime monthlyEndDate = new DateTime(2021, 3, 1).AddMilliseconds(-1);
+            DateTime dailyStartDate = new DateTime(2021, 3, 1);
+            DateTime dailyEndDate = new DateTime(2022, 1, 1).AddMilliseconds(-1);
+            DateTime singleStartDate = new DateTime(2022, 1, 1);
+            DateTime singleEndDate = new DateTime(2022, 3, 1).AddMilliseconds(-1);
+            bool processed = false;
 
-            //MethodInfo methodInfo = typeof(List<int>).GetMethod("Contains", new Type[] { typeof(int) });
-            //ConstantExpression progs = Expression.Constant(programs);
-            ParameterExpression param = Expression.Parameter(typeof(Contacts), "x");
-            //MemberExpression programMember = Expression.Property(param, "Program");
-            MemberExpression member = Expression.Property(param, "ServDate");
-            //Type propertyType = ((PropertyInfo)member.Member).PropertyType;
-            ConstantExpression constant = Expression.Constant(StartDate, typeof(DateTime?));
-            // Expression expression1 = Expression.GreaterThanOrEqual(member, constant);
-            // constant = Expression.Constant((DateTime?)EndDate);
-            // Expression expression2 = Expression.LessThanOrEqual(member, constant);
-            // Expression expression3 = Expression.Call(progs, methodInfo, programMember);
-            Expression expression3 = Expression.LessThanOrEqual(member, constant);
-            Expression<Func<Contacts, bool>> funcExpression = Expression.Lambda<Func<Contacts, bool>>(expression3, param);
-            var func = funcExpression.Compile();
+            Client client = _context.Clients.Where(c => c.ClientId == metaClient.ClientId).SingleOrDefault();
 
-            // query = query.Include(c => c.Contacts.Where(func));
+            if (client != null)
+            {
+                List<Contacts> contacts = GetContactsQuery(metaClient.ClientId, yearlyStartDate, yearlyEndDate).ToList();
 
-            // if (StartDate != null || EndDate != null)
-            // {
-            // if (EndDate == null)
-            // {
-            // query = query.Include(
-            // c => c.Contacts.Where(co => co.ServDate >= StartDate && programs.Contains(co.Program)).OrderBy(co => co.ServDate)).ThenInclude(co => co.ProgressNotes);
-            // }
+                if (contacts.Any())
+                {
+                    PDFDocument doc = new PDFDocument(_outputPath);
+                    doc.RenderYearly(client, contacts);
+                    processed = true;
+                }
 
-            // if (StartDate == null)
-            // {
-            // query = query.Include(
-            // c => c.Contacts.Where(co => co.ServDate <= EndDate && programs.Contains(co.Program)).OrderBy(co => co.ServDate)).ThenInclude(co => co.ProgressNotes);
-            // }
+                contacts = GetContactsQuery(metaClient.ClientId, monthlyStartDate, monthlyEndDate).ToList();
 
-            // query = query.Include(
-            // c => c.Contacts.Where(co => co.ServDate >= StartDate && co.ServDate <= EndDate && programs.Contains(co.Program)).OrderBy(co => co.ServDate)).ThenInclude(co => co.ProgressNotes);
-            // }
-            // else
-            // {
-            // query = query.Include(
-            // c => c.Contacts.Where(co => programs.Contains(co.Program)).OrderBy(co => co.ServDate)).ThenInclude(co => co.ProgressNotes);
-            // }
+                if (contacts.Any())
+                {
+                    PDFDocument doc = new PDFDocument(_outputPath);
+                    doc.RenderMonthly(client, contacts);
+                    processed = true;
+                }
 
-            // if (ClientId != null)
-            // {
-            // query = query.Where(c => c.ClientId == ClientId);
-            // }
+                contacts = GetContactsQuery(metaClient.ClientId, dailyStartDate, dailyEndDate).ToList();
 
-            // query = query.OrderBy(c => c.LastName).ThenBy(c => c.FirstName);
-            // var query = _context.Clients.Include(c => c.Contacts.Where(x => x.ServDate <= StartDate));
-            var query = _context.Clients.Include(c => c.Contacts.AsQueryable<Contacts>().Where<Contacts>(co => co.ServDate >= StartDate));
-            List<Client> clients = query.ToList();
-            //List<Client> clients = query.ToList().Where(c => c.Contacts.Any()).ToList();
+                if (contacts.Any())
+                {
+                    PDFDocument doc = new PDFDocument(_outputPath);
+                    doc.RenderDaily(client, contacts);
+                    processed = true;
+                }
 
-            //if (clients.Count == 0)
-            //{
-            //    throw new Exception();
-            //}
+                contacts = GetContactsQuery(metaClient.ClientId, singleStartDate, singleEndDate).ToList();
 
-            //Console.WriteLine($"Client count: {clients.Count()}");
+                if (contacts.Any())
+                {
+                    PDFDocument doc = new PDFDocument(_outputPath);
+                    doc.RenderSingle(client, contacts);
+                    processed = true;
+                }
+            }
 
-            //foreach (Client c in clients)
-            //{
-            //    PDFDocument pdf = new PDFDocument(outputPath, metadataFile);
-            //    pdf.GeneratePdf(c, Mode);
-            //}
+            metaClient.Processed = processed;
+
+            _metaContext.SaveChanges();
+        }
+
+        private IQueryable<Contacts> GetContactsQuery(int clientId, DateTime startDate, DateTime endDate)
+        {
+            return _context.Contacts
+                            .Include(c => c.StaffEmployee)
+                            .Include(c => c.ServiceCode)
+                            .Include(c => c.ProgramLkp)
+                            .Include(c => c.LocationLkp)
+                            .Include(c => c.EntryStaffEmployee)
+                            .Include(c => c.SignedByStaffEmployee)
+                            .Include(c => c.ProgressNotes)
+                            .Include(c => c.GroupProgressNotes)
+                            .Where(c => c.ClientId == clientId
+                                    && c.ServDate >= startDate
+                                    && c.ServDate <= endDate)
+                            .OrderBy(c => c.ServDate);
         }
     }
 }

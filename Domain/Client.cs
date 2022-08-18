@@ -15,8 +15,7 @@ namespace Domain
         public string FirstName { get; set; }
         public string MiddleInitial { get; set; }
         public string LastFirstName { get; set; }
-        public List<Intakes> Intakes { get; set; }
-        public List<Contacts> Contacts { get; set; }
-        public List<ProgressNotes> ProgressNotes { get; set; }
+        //public List<Intakes> Intakes { get; set; }
+        //public List<Contacts> Contacts { get; set; }
     }
 }

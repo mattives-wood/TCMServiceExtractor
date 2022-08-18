@@ -8,7 +8,7 @@ public class MetaContext : DbContext
 {
     public static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-    public MetaContext(DbContextOptions<Context> options) : base(options) { }
+    public MetaContext(DbContextOptions<MetaContext> options) : base(options) { }
 
     public DbSet<Client> Clients { get; set; }
 
@@ -16,7 +16,7 @@ public class MetaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
+        //optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

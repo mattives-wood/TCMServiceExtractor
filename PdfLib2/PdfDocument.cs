@@ -23,11 +23,7 @@ namespace PdfLib
             _path = path;
         }
 
-        public void GeneratePdf(Client client)
-        {
-        }
-
-        private void RenderSingle(Client client)
+        public void RenderSingle(Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -38,7 +34,7 @@ namespace PdfLib
             //List<Metadata> metas = new List<Metadata>();
             //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
-            foreach (Contacts contact in client.Contacts)
+            foreach (Contacts contact in contacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Document doc = new Document();
@@ -68,7 +64,7 @@ namespace PdfLib
             //Csv.WriteCsvFile(metas, _metadataFile);
         }
 
-        private void RenderDaily(Client client)
+        public void RenderDaily(Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -76,11 +72,11 @@ namespace PdfLib
                 Directory.CreateDirectory(path);
             }
 
-            IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => c.ServDate.Value.Date);
+            IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => c.ServDate.Value.Date);
             //List<Metadata> metas = new List<Metadata>();
             //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
-            foreach (IGrouping<DateTime, Contacts> group in contacts)
+            foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Document doc = new Document();
@@ -109,7 +105,7 @@ namespace PdfLib
             //Csv.WriteCsvFile(metas, _metadataFile);
         }
 
-        private void RenderMonthly(Client client)
+        public void RenderMonthly(Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -117,11 +113,9 @@ namespace PdfLib
                 Directory.CreateDirectory(path);
             }
 
-            IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, c.ServDate.Value.Month, 01));
-            //List<Metadata> metas = new List<Metadata>();
-            //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
+            IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, c.ServDate.Value.Month, 01));
 
-            foreach (IGrouping<DateTime, Contacts> group in contacts)
+            foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Document doc = new Document();
@@ -134,7 +128,7 @@ namespace PdfLib
                 string filename = $"{group.Key.ToString("yyyy-MM")}";
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                DateTime effectiveDate = new DateTime(contacts.First().First().ServDate.Value.Year, contacts.First().First().ServDate.Value.Month, 1);
+                DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, orderedContacts.First().First().ServDate.Value.Month, 1);
                 //metas.Add(
                 //    new Metadata()
                 //    {
@@ -151,7 +145,7 @@ namespace PdfLib
             //Csv.WriteCsvFile(metas, _metadataFile);
         }
 
-        private void RenderYearly(Client client)
+        public void RenderYearly(Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -159,11 +153,11 @@ namespace PdfLib
                 Directory.CreateDirectory(path);
             }
 
-            IEnumerable<IGrouping<DateTime, Contacts>> contacts = client.Contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
+            IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
             //List<Metadata> metas = new List<Metadata>();
             //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
-            foreach (IGrouping<DateTime, Contacts> group in contacts)
+            foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Document doc = new Document();
@@ -176,7 +170,7 @@ namespace PdfLib
                 string filename = $"{group.Key.ToString("yyyy")}";
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                DateTime effectiveDate = new DateTime(contacts.First().First().ServDate.Value.Year, 1, 1);
+                DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, 1, 1);
                 //metas.Add(
                 //    new Metadata()
                 //    {
@@ -204,15 +198,24 @@ namespace PdfLib
                                             $" | {contact.StaffEmployee.LastName}, {contact.StaffEmployee.FirstName}", "Heading1");
 
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"Date of Service:\t{contact.ServDate}");
+                sb.Append($"Contact ID:\t{contact.KeyId}");
+                sb.Append($"\nDate of Service:\t{contact.ServDate}");
                 sb.Append($"\nService:\t{contact.Activity} - {contact.ServiceCode.Description}");
                 sb.Append($"\nProgram:\t{contact.ProgramLkp.Name}");
                 sb.Append($"\nProvider:\t{contact.StaffEmployee.LastName}, {contact.StaffEmployee.FirstName}");
                 sb.Append($"\nLocation:\t{contact.LocationLkp.Description}");
                 sb.Append($"\nEntered by:\t{contact.EntryStaffEmployee.LastName}, {contact.EntryStaffEmployee.FirstName}");
                 sb.Append($"\nEntered on:\t{contact.CreateDate}");
-                sb.Append($"\nSigned on:\t{contact.SignedByDate}");
-                sb.Append($"\nSigned by:\t{contact.SignedByStaffEmployee.LastName}, {contact.SignedByStaffEmployee.FirstName}");
+                if (contact.SignedByStaffId == 0)
+                {
+                    sb.Append($"\nSigned on:\tUnsigned");
+                    sb.Append($"\nSigned by:\tUnsigned");
+                }
+                else
+                {
+                    sb.Append($"\nSigned on:\t{contact.SignedByDate}");
+                    sb.Append($"\nSigned by:\t{contact.SignedByStaffEmployee.LastName}, {contact.SignedByStaffEmployee.FirstName}");
+                }
                 sb.Append($"\nTotal duration:\t{contact.TimeSpent}");
                 sb.Append($"\nFace to face duration:\t{contact.FaceToFace}");
                 sb.Append($"\nOther consumer contact duration:\t{contact.OtherContactType}");
@@ -222,12 +225,25 @@ namespace PdfLib
                 sb.Append($"\nTravel time:\t{contact.TravelTime}");
                 sb.Append($"\nMileage:\t{contact.Mileage}");
 
-                paragraph = doc.LastSection
-                                          .AddParagraph(sb.ToString(), "ServiceData");
+                paragraph = doc.LastSection.AddParagraph(sb.ToString(), "ServiceData");
 
-                paragraph = doc.LastSection.AddParagraph();
-                paragraph.Style = "ServiceText";
-                paragraph.AddText(contact.ProgressNotes.ProgressNote.Replace("\r", "\n"));
+                if (contact.ProgressNoteKey != 0)
+                {
+                    paragraph = doc.LastSection.AddParagraph();
+                    paragraph.Style = "ServiceText";
+                    paragraph.AddText(contact.ProgressNotes.ProgressNote.Replace("\r", "\n"));
+                }
+
+                if (contact.GroupNoteKey != 0)
+                {
+                    paragraph = doc.LastSection.AddParagraph();
+                    paragraph.Style = "GroupHeader";
+                    paragraph.AddText("Group Note:");
+
+                    paragraph = doc.LastSection.AddParagraph();
+                    paragraph.Style = "GroupText";
+                    paragraph.AddText(contact.GroupProgressNotes.ProgressNote.Replace("\r", "\n"));
+                }
             }
         }
 
@@ -249,40 +265,35 @@ namespace PdfLib
             style.Font.Size = 0;
             style.ParagraphFormat.PageBreakBefore = true;
 
-            style = doc.Styles["Heading2"];
-            style.Font.Size = 12;
-            style.Font.Bold = true;
-            style.ParagraphFormat.PageBreakBefore = false;
-            style.ParagraphFormat.SpaceBefore = 6;
-            style.ParagraphFormat.SpaceAfter = 6;
-
-            style = doc.Styles["Heading3"];
-            style.Font.Size = 10;
-            style.Font.Bold = true;
-            style.Font.Italic = true;
-            style.ParagraphFormat.SpaceBefore = 6;
-            style.ParagraphFormat.SpaceAfter = 3;
-
             style = doc.Styles[StyleNames.Header];
             style.Font.Size = 12;
             style.Font.Bold = true;
-            //style.ParagraphFormat.AddTabStop("16cm", TabAlignment.Right);
 
             style = doc.Styles[StyleNames.Footer];
             style.ParagraphFormat.AddTabStop("8cm", TabAlignment.Center);
 
-            // Create a new style called TextBox based on style Normal
             style = doc.Styles.AddStyle("ServiceText", "Normal");
             style.ParagraphFormat.Alignment = ParagraphAlignment.Left;
+            style.ParagraphFormat.SpaceAfter = 12;
 
             style = doc.Styles.AddStyle("ServiceData", "Normal");
             style.ParagraphFormat.Borders.Style = BorderStyle.Single;
             style.ParagraphFormat.Borders.Width = .5;
             style.ParagraphFormat.Borders.Distance = 3;
-            //style.ParagraphFormat.OutlineLevel = OutlineLevel.Level1;
-            //style.ParagraphFormat.PageBreakBefore = true;
             style.ParagraphFormat.SpaceAfter = 12;
             style.ParagraphFormat.AddTabStop("5cm", TabAlignment.Left);
+
+            style = doc.Styles.AddStyle("GroupHeader", "Normal");
+            style.ParagraphFormat.Alignment = ParagraphAlignment.Left;
+            style.Font.Size = 12;
+            style.ParagraphFormat.SpaceAfter = 4;
+
+            style = doc.Styles.AddStyle("GroupText", "Normal");
+            style.ParagraphFormat.Borders.Style = BorderStyle.Single;
+            style.ParagraphFormat.Borders.Width = .5;
+            style.ParagraphFormat.Borders.Distance = 3;
+            style.ParagraphFormat.SpaceAfter = 12;
+            style.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         }
 
         private void DefineContentSection(Document doc, Client client)

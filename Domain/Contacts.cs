@@ -41,6 +41,7 @@ namespace Domain
         public decimal Travel { get; set; }
         public decimal BillableTime { get; set; }
         public int SignedByStaffId { get; set; }
+        public int GroupNoteKey { get; set; }
         public DateTime? SignedByDate { get; set; }
         [ForeignKey("ClientId")]
         public Client Client { get; set; }
@@ -48,6 +49,8 @@ namespace Domain
         public ProgramLkp ProgramLkp { get; set; }
         [ForeignKey("ProgressNoteKey")]
         public ProgressNotes ProgressNotes { get; set; }
+        [ForeignKey("GroupNoteKey")]
+        public ProgressNotes GroupProgressNotes { get; set; }
         [ForeignKey("IntakeKey")]
         public Intakes Intake { get; set; }
         [ForeignKey("Location")]
