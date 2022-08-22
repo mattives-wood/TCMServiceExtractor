@@ -3,6 +3,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using System;
+
 namespace Data
 {
     public class Context : DbContext

@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Data;
-
 using Domain;
 
 using MigraDoc.DocumentObjectModel;

@@ -11,8 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
-using System.Security.Cryptography.X509Certificates;
 
 namespace App
 {
@@ -37,13 +35,12 @@ namespace App
 
         public void Run()
         {            
-            string metadataFile = _config.GetValue<string>("MetadataFile");
             List<int> programs = new List<int>();
             _config.GetSection("Parameters").GetSection("Programs").Bind(programs);
 
             //Get list of ClientIDs to process
             List<Domain.Meta.Client> clients = _metaContext.Clients.ToList();
-            //List<Domain.Meta.Client> clients = _metaContext.Clients.Where(c => c.ClientId == 101424).ToList();
+
             float count = clients.Count;
             float done = 0;
             float percent = -1;
