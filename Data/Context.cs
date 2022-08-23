@@ -10,7 +10,6 @@ namespace Data
     public class Context : DbContext
     {
         public static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-
         public Context(DbContextOptions<Context> options) : base(options) { }
 
         public DbSet<Client> Clients { get; set; }
@@ -31,7 +30,10 @@ namespace Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
+            if (Environment.GetEnvironmentVariable("Development") == "true")
+            {
+                optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

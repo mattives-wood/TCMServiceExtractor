@@ -3,6 +3,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using System;
+
 namespace Data;
 public class MetaContext : DbContext
 {
@@ -16,7 +18,10 @@ public class MetaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        //optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
+        if (Environment.GetEnvironmentVariable("Development") == "true")
+        {
+            optionsBuilder.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
