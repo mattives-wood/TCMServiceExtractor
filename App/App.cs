@@ -77,7 +77,7 @@ namespace App
 
                 if (contacts.Any())
                 {
-                    PDFDocument doc = new PDFDocument(_outputPath);
+                    PDFDocument doc = new PDFDocument(_outputPath, _metaContext);
                     doc.RenderYearly(client, contacts);
                     processed = true;
                 }
@@ -86,7 +86,7 @@ namespace App
 
                 if (contacts.Any())
                 {
-                    PDFDocument doc = new PDFDocument(_outputPath);
+                    PDFDocument doc = new PDFDocument(_outputPath, _metaContext);
                     doc.RenderMonthly(client, contacts);
                     processed = true;
                 }
@@ -95,7 +95,7 @@ namespace App
 
                 if (contacts.Any())
                 {
-                    PDFDocument doc = new PDFDocument(_outputPath);
+                    PDFDocument doc = new PDFDocument(_outputPath, _metaContext);
                     doc.RenderDaily(client, contacts);
                     processed = true;
                 }
@@ -104,7 +104,7 @@ namespace App
 
                 if (contacts.Any())
                 {
-                    PDFDocument doc = new PDFDocument(_outputPath);
+                    PDFDocument doc = new PDFDocument(_outputPath, _metaContext);
                     doc.RenderSingle(client, contacts);
                     processed = true;
                 }

@@ -6,11 +6,12 @@ create table Client
 
 create table Metadata
 (
-	LegacyDocumentCodeId int identity,
-	LegacyDocumentId int,
+	LegacyDocumentId int identity,
+	LegacyDocumentCodeId int,	
 	LegacyDocumentName nvarchar(50),
 	LegacyClientId int,
 	EffectiveDate datetime2,
 	LegacyDocumentCategory nvarchar(50),
 	PathToPdfFile nvarchar(100)
 )
+

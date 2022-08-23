@@ -8,8 +8,8 @@ namespace Domain.Meta;
 public class Metadata
 {
     [Key]
-    public int LegacyDocumentCodeId { get; set; }
     public int LegacyDocumentId { get; set; }
+    public int LegacyDocumentCodeId { get; set; }    
     public string LegacyDocumentName { get; set; }
     public int LegacyClientId { get; set; }
     public DateTime EffectiveDate { get; set; }

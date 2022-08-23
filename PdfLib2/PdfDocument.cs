@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using Data;
+
 using Domain;
+using Domain.Meta;
 
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
@@ -14,23 +17,22 @@ namespace PdfLib
     public class PDFDocument
     {
         private readonly string _path;
+        private readonly MetaContext _metaContext;
         private readonly string _extension = "pdf";
 
-        public PDFDocument(string path)
+        public PDFDocument(string path, MetaContext metaContext)
         {
             _path = path;
+            _metaContext = metaContext;
         }
 
-        public void RenderSingle(Client client, List<Contacts> contacts)
+        public void RenderSingle(Domain.Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
-
-            //List<Metadata> metas = new List<Metadata>();
-            //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
             foreach (Contacts contact in contacts)
             {
@@ -46,23 +48,22 @@ namespace PdfLib
 
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                //metas.Add(
-                //    new Metadata()
-                //    {
-                //        EffectiveDate = contact.ServDate.Value.ToShortDateString(),
-                //        LegacyDocumentId = ++lastSeqNum,
-                //        LegacyClientId = client.ClientId,
-                //        LegacyDocumentCategory = "Service Notes",
-                //        LegacyDocumentCodeId = 60078,
-                //        LegacyDocumentName = filename,
-                //        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
-                //    });
-            }
+                Metadata metadata = new Metadata()
+                {
+                    EffectiveDate = contact.ServDate.Value,
+                    LegacyClientId = client.ClientId,
+                    LegacyDocumentCategory = "Service Notes",
+                    LegacyDocumentCodeId = 60078,
+                    LegacyDocumentName = filename,
+                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                };
 
-            //Csv.WriteCsvFile(metas, _metadataFile);
+                _metaContext.Metadatas.Add(metadata);
+                _metaContext.SaveChanges();
+            }
         }
 
-        public void RenderDaily(Client client, List<Contacts> contacts)
+        public void RenderDaily(Domain.Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -71,8 +72,6 @@ namespace PdfLib
             }
 
             IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => c.ServDate.Value.Date);
-            //List<Metadata> metas = new List<Metadata>();
-            //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
             foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
             {
@@ -87,23 +86,22 @@ namespace PdfLib
                 string filename = $"{group.Key.ToString("yyyy-MM-dd")}";
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                //metas.Add(
-                //    new Metadata()
-                //    {
-                //        EffectiveDate = contacts.First().First().ServDate.Value.ToShortDateString(),
-                //        LegacyDocumentId = ++lastSeqNum,
-                //        LegacyClientId = client.ClientId,
-                //        LegacyDocumentCategory = "Service Notes",
-                //        LegacyDocumentCodeId = 60078,
-                //        LegacyDocumentName = filename,
-                //        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
-                //    });
-            }
+                Metadata metadata = new Metadata()
+                {
+                    EffectiveDate = contacts.First().ServDate.Value,
+                    LegacyClientId = client.ClientId,
+                    LegacyDocumentCategory = "Service Notes",
+                    LegacyDocumentCodeId = 60078,
+                    LegacyDocumentName = filename,
+                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                };
 
-            //Csv.WriteCsvFile(metas, _metadataFile);
+                _metaContext.Metadatas.Add(metadata);
+                _metaContext.SaveChanges();
+            }
         }
 
-        public void RenderMonthly(Client client, List<Contacts> contacts)
+        public void RenderMonthly(Domain.Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -127,23 +125,23 @@ namespace PdfLib
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
                 DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, orderedContacts.First().First().ServDate.Value.Month, 1);
-                //metas.Add(
-                //    new Metadata()
-                //    {
-                //        EffectiveDate = effectiveDate.ToShortDateString(),
-                //        LegacyDocumentId = ++lastSeqNum,
-                //        LegacyClientId = client.ClientId,
-                //        LegacyDocumentCategory = "Service Notes",
-                //        LegacyDocumentCodeId = 60078,
-                //        LegacyDocumentName = filename,
-                //        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
-                //    });
-            }
 
-            //Csv.WriteCsvFile(metas, _metadataFile);
+                Metadata metadata = new Metadata()
+                {
+                    EffectiveDate = effectiveDate,
+                    LegacyClientId = client.ClientId,
+                    LegacyDocumentCategory = "Service Notes",
+                    LegacyDocumentCodeId = 60078,
+                    LegacyDocumentName = filename,
+                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                };
+
+                _metaContext.Metadatas.Add(metadata);
+                _metaContext.SaveChanges();
+            }
         }
 
-        public void RenderYearly(Client client, List<Contacts> contacts)
+        public void RenderYearly(Domain.Client client, List<Contacts> contacts)
         {
             string path = $"{_path}\\{client.ClientId}";
             if (!Directory.Exists(path))
@@ -152,8 +150,6 @@ namespace PdfLib
             }
 
             IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
-            //List<Metadata> metas = new List<Metadata>();
-            //int lastSeqNum = Csv.GetLastSeqNum(_metadataFile);
 
             foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
             {
@@ -169,20 +165,20 @@ namespace PdfLib
                 renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
                 DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, 1, 1);
-                //metas.Add(
-                //    new Metadata()
-                //    {
-                //        EffectiveDate = effectiveDate.ToShortDateString(),
-                //        LegacyDocumentId = ++lastSeqNum,
-                //        LegacyClientId = client.ClientId,
-                //        LegacyDocumentCategory = "Service Notes",
-                //        LegacyDocumentCodeId = 60078,
-                //        LegacyDocumentName = filename,
-                //        PathToPDFFile = $"{client.ClientId}\\{filename}.{_extension}"
-                //    });
-            }
 
-            //Csv.WriteCsvFile(metas, _metadataFile);
+                Metadata metadata = new Metadata()
+                {
+                    EffectiveDate = effectiveDate,
+                    LegacyClientId = client.ClientId,
+                    LegacyDocumentCategory = "Service Notes",
+                    LegacyDocumentCodeId = 60078,
+                    LegacyDocumentName = filename,
+                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                };
+
+                _metaContext.Metadatas.Add(metadata);
+                _metaContext.SaveChanges();
+            }
         }
 
         private void ProcessServiceInfo(Document doc, List<Contacts> contacts)
@@ -294,7 +290,7 @@ namespace PdfLib
             style.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         }
 
-        private void DefineContentSection(Document doc, Client client)
+        private void DefineContentSection(Document doc, Domain.Client client)
         {
             Section section = doc.AddSection();
             section.PageSetup.StartingNumber = 1;
