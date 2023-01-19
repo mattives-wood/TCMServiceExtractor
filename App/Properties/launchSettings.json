@@ -5,6 +5,9 @@
       "environmentVariables": {
         "Development": "true"
       }
+    },
+    "Release": {
+      "commandName": "Project"
     }
   }
 }

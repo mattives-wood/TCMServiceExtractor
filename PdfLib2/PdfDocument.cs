@@ -109,35 +109,40 @@ namespace PdfLib
                 Directory.CreateDirectory(path);
             }
 
-            IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, c.ServDate.Value.Month, 01));
+            IEnumerable<IGrouping<int, Contacts>> programGroupedContacts = contacts.GroupBy(c => c.Program);
 
-            foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
+            foreach (IGrouping<int, Contacts> programContactGroup in programGroupedContacts)
             {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                Document doc = new Document();
-                DefineStyles(doc);
-                DefineContentSection(doc, client);
-                ProcessServiceInfo(doc, group.ToList());
-                PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
-                renderer.Document = doc;
-                renderer.RenderDocument();
-                string filename = $"{group.Key.ToString("yyyy-MM")}";
-                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
+                IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = programContactGroup.GroupBy(c => new DateTime(c.ServDate.Value.Year, c.ServDate.Value.Month, 01));
 
-                DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, orderedContacts.First().First().ServDate.Value.Month, 1);
-
-                Metadata metadata = new Metadata()
+                foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
                 {
-                    EffectiveDate = effectiveDate,
-                    LegacyClientId = client.ClientId,
-                    LegacyDocumentCategory = "Service Notes",
-                    LegacyDocumentCodeId = 60078,
-                    LegacyDocumentName = filename,
-                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
-                };
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    Document doc = new Document();
+                    DefineStyles(doc);
+                    DefineContentSection(doc, client);
+                    ProcessServiceInfo(doc, group.ToList());
+                    PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
+                    renderer.Document = doc;
+                    renderer.RenderDocument();
+                    string filename = $"{group.Key.ToString("yyyy-MM")}_{programContactGroup.First().ProgramLkp.Abbreviation}";
+                    renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                _metaContext.Metadatas.Add(metadata);
-                _metaContext.SaveChanges();
+                    DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, orderedContacts.First().First().ServDate.Value.Month, 1);
+
+                    Metadata metadata = new Metadata()
+                    {
+                        EffectiveDate = effectiveDate,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = $"{filename}_{group.First().ProgramLkp.Name}",
+                        PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    };
+
+                    _metaContext.Metadatas.Add(metadata);
+                    _metaContext.SaveChanges();
+                }
             }
         }
 
@@ -149,35 +154,40 @@ namespace PdfLib
                 Directory.CreateDirectory(path);
             }
 
-            IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = contacts.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
+            IEnumerable<IGrouping<int, Contacts>> programGroupedContacts = contacts.GroupBy(c => c.Program);
 
-            foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
+            foreach (IGrouping<int, Contacts> programContactGroup in programGroupedContacts)
             {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                Document doc = new Document();
-                DefineStyles(doc);
-                DefineContentSection(doc, client);
-                ProcessServiceInfo(doc, group.ToList());
-                PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
-                renderer.Document = doc;
-                renderer.RenderDocument();
-                string filename = $"{group.Key.ToString("yyyy")}";
-                renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
+                IEnumerable<IGrouping<DateTime, Contacts>> orderedContacts = programContactGroup.GroupBy(c => new DateTime(c.ServDate.Value.Year, 01, 01));
 
-                DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, 1, 1);
-
-                Metadata metadata = new Metadata()
+                foreach (IGrouping<DateTime, Contacts> group in orderedContacts)
                 {
-                    EffectiveDate = effectiveDate,
-                    LegacyClientId = client.ClientId,
-                    LegacyDocumentCategory = "Service Notes",
-                    LegacyDocumentCodeId = 60078,
-                    LegacyDocumentName = filename,
-                    PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
-                };
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    Document doc = new Document();
+                    DefineStyles(doc);
+                    DefineContentSection(doc, client);
+                    ProcessServiceInfo(doc, group.ToList());
+                    PdfDocumentRenderer renderer = new PdfDocumentRenderer(true);
+                    renderer.Document = doc;
+                    renderer.RenderDocument();
+                    string filename = $"{group.Key.ToString("yyyy")}_{programContactGroup.First().ProgramLkp.Abbreviation}";
+                    renderer.PdfDocument.Save($"{path}\\{filename}.{_extension}");
 
-                _metaContext.Metadatas.Add(metadata);
-                _metaContext.SaveChanges();
+                    DateTime effectiveDate = new DateTime(orderedContacts.First().First().ServDate.Value.Year, 1, 1);
+
+                    Metadata metadata = new Metadata()
+                    {
+                        EffectiveDate = effectiveDate,
+                        LegacyClientId = client.ClientId,
+                        LegacyDocumentCategory = "Service Notes",
+                        LegacyDocumentCodeId = 60078,
+                        LegacyDocumentName = $"{filename}_{group.First().ProgramLkp.Name}",
+                        PathToPdfFile = $"{client.ClientId}\\{filename}.{_extension}"
+                    };
+
+                    _metaContext.Metadatas.Add(metadata);
+                    _metaContext.SaveChanges();
+                }
             }
         }
 
