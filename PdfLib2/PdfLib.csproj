@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="28.0.1" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="PdfSharp.MigraDoc.Standard" Version="1.51.15" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
