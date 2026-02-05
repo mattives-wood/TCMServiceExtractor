@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "App\App.csproj", "{5054C3E6-1936-4E95-BCA8-43F6082CFE90}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{73C3F0F5-2E0E-4152-B5EA-4408A357B5F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfLib", "PdfLib2\PdfLib.csproj", "{1A1FC86D-D573-4D20-B1BC-2A243887E97D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XLSLib", "XLSLib\XLSLib.csproj", "{5567909B-A4D1-4125-8252-36D0AD83FAFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1A1FC86D-D573-4D20-B1BC-2A243887E97D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A1FC86D-D573-4D20-B1BC-2A243887E97D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A1FC86D-D573-4D20-B1BC-2A243887E97D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5567909B-A4D1-4125-8252-36D0AD83FAFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5567909B-A4D1-4125-8252-36D0AD83FAFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5567909B-A4D1-4125-8252-36D0AD83FAFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5567909B-A4D1-4125-8252-36D0AD83FAFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
