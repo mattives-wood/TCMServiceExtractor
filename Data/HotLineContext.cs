@@ -1,5 +1,7 @@
 ﻿using Domain.Hotline;
 using Domain.Meta;
+using Domain.Services;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +19,8 @@ public class HotLineContext : DbContext
     public HotLineContext(DbContextOptions<HotLineContext> options) : base(options) { }
 
     public DbSet<HotLineHist> hotLineHists { get; set; }
+
+    public DbSet<Client> clients { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
