@@ -10,5 +10,5 @@ public class EmCallTypeLkp
 
     [Key]
     public int Code { get; set; }
-    public string Description { get; set; }
+    public required string Description { get; set; }
 }

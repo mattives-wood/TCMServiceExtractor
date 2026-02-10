@@ -12,19 +12,19 @@ public class BH : IMetadata
     [Key]
     public int ClientId { get; set; }
 
-    public string LastName { get; set; }
+    public string? LastName { get; set; }
 
-    public string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     public DateTime? DOB { get; set; }
 
     public DateTime? BHActivityDate { get; set; }
 
-    public string BHActivityType { get; set; }
+    public string? BHActivityType { get; set; }
 
-    public string BHProgram { get; set; }
+    public string? BHProgram { get; set; }
 
-    public string KeepBH { get; set; }
+    public string? KeepBH { get; set; }
 
     [Column("BH")]
     public bool BHyn { get; set; }

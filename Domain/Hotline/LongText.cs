@@ -10,5 +10,5 @@ public class LongText
 
     [Key]
     public int TextId { get; set; }
-    public string TextBlob { get; set; }
+    public string? TextBlob { get; set; }
 }

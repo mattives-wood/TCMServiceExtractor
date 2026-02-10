@@ -14,9 +14,9 @@ public class VitalSign
     [Key]
     public int Seq {  get; set; }
     public int ClientId { get; set; }
-    public Client Client { get; set; }
+    public required Client Client { get; set; }
     public int AssessorId { get; set; }
-    public Employees Assessor {  get; set; }
+    public Employees? Assessor {  get; set; }
     public DateTime AsmtDate { get; set; }
     [Column("Q1")]
     public int BPStanding { get; set; }

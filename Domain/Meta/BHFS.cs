@@ -10,9 +10,9 @@ public class BHFS : IMetadata
     [Key]
     public int ClientId { get; set; }
 
-    public string LastName { get; set; }
+    public string? LastName { get; set; }
 
-    public string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     public DateTime? DOB { get; set; }
 

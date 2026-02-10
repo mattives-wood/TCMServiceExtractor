@@ -10,7 +10,7 @@ namespace Domain.Services
 
         [Key]
         public int Code { get; set; }
-        public string Abbreviation { get; set; }
-        public string Name { get; set; }
+        public string? Abbreviation { get; set; }
+        public required string Name { get; set; }
     }
 }

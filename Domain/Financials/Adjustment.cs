@@ -8,7 +8,7 @@ public class Adjustment
     public int ClientId { get; set; }
     public DateTime AdjustDate { get; set; }
     public decimal AdjustAmount { get; set; }
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
     public int EntryStaffId { get; set; }
     public DateTime EntryDate { get; set; }
     public int KeyId { get; set; }
@@ -18,5 +18,5 @@ public class Adjustment
     public DateTime PostDate { get; set; }
     public int PaymentAllocKey { get; set; }
     public int PaymentId { get; set; }
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }

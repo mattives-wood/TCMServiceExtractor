@@ -19,17 +19,17 @@ namespace Domain.Services
         public int Mileage { get; set; }
         public decimal TimeSpent { get; set; }
         public int? EntryStaffId { get; set; }
-        public string ClientLast { get; set; }
-        public string ClientFirst { get; set; }
+        public required string ClientLast { get; set; }
+        public required string ClientFirst { get; set; }
         public DateTime? ClientDOB { get; set; }
         public int? Activity { get; set; }
         public int? Location { get; set; }
         public int Program { get; set; }
         public int? CreateStaffId { get; set; }
-        public string CreateName { get; set; }
+        public string? CreateName { get; set; }
         public DateTime? CreateDate { get; set; }
-        public string ProviderLast { get; set; }
-        public string ProviderFirst { get; set; }
+        public string? ProviderLast { get; set; }
+        public string? ProviderFirst { get; set; }
         public decimal TravelTime { get; set; }
         public int? ContactSigned { get; set; }
         public decimal FaceToFace { get; set; }
@@ -43,7 +43,7 @@ namespace Domain.Services
         public int? GroupNoteKey { get; set; }
         public DateTime? SignedByDate { get; set; }
         [ForeignKey("ClientId")]
-        public Client Client { get; set; }
+        public required Client Client { get; set; }
         [ForeignKey("Program")]
         public ProgramLkp? ProgramLkp { get; set; }
         [ForeignKey("ProgressNoteKey")]

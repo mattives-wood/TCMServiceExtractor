@@ -17,7 +17,7 @@ public class HotLineHist
     public int? ClientId { get; set; }
     [ForeignKey("ClientId")]
     public Client? Client { get; set; }
-    public string ClientTable { get; set; }
+    public string? ClientTable { get; set; }
     public int? CallerId { get; set; }
     [ForeignKey("CallerId")]
     public Client? ClientCaller { get; set; }
@@ -27,7 +27,7 @@ public class HotLineHist
     public Employees? StaffCaller { get; set; }
     [ForeignKey("CallerId")]
     public HotLineClient? HLClientCaller { get; set; }
-    public string CallerTable { get; set; }
+    public string? CallerTable { get; set; }
     public int? StaffId { get; set; }
     [ForeignKey("StaffId")]
     public Employees? Staff { get; set; }
@@ -98,6 +98,6 @@ public class HotLineHist
     public decimal Travel { get; set; }
     public decimal DistributedTotalTime { get; set; }
     public decimal DistributedBillableTime { get; set; }
-    public string DistributedTimeUnitType { get; set; }
+    public string? DistributedTimeUnitType { get; set; }
     public int? RelationshipSelf { get; set; }
 }

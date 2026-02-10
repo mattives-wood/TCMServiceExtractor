@@ -11,7 +11,7 @@ namespace Domain.Services
 
         [Key]
         public int NoteKey { get; set; }
-        public string ProgressNote { get; set; }
+        public required string ProgressNote { get; set; }
         public DateTime? DateSigned { get; set; }
     }
 }

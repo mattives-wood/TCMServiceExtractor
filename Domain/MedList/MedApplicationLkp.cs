@@ -13,5 +13,5 @@ public class MedApplicationLkp
     public MedApplicationLkp() { }
     [Key]
     public int Code { get; set; }
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }

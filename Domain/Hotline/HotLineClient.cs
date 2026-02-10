@@ -10,6 +10,6 @@ public class HotLineClient
 
 	[Key]
 	public int HLClientId { get; set; }
-	public string LastName { get; set; }
-	public string FirstName { get; set; }
+	public string? LastName { get; set; }
+	public string? FirstName { get; set; }
 }

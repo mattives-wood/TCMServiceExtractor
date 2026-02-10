@@ -10,20 +10,20 @@ public class MedInfo
     [Key]
     public int ClientId { get; set; }
 
-    public string Physician { get; set; }
+    public string? Physician { get; set; }
 
-    public string Allergies { get; set; }
+    public string? Allergies { get; set; }
 
     public int PharmacyId { get; set; }
 
-    public Pharmacy Pharmacy { get; set; }
+    public Pharmacy? Pharmacy { get; set; }
 
-    public string OtherMedOrdersText { get; set; }
+    public string? OtherMedOrdersText { get; set; }
 
-    public string MedAlerts { get; set; }
+    public string? MedAlerts { get; set; }
 
     public int PhysicianCode { get; set; }
 
     [ForeignKey("PhysicianCode")]
-    public Employee PhysicianCodeEmployee { get; set; }
+    public Employee? PhysicianCodeEmployee { get; set; }
 }

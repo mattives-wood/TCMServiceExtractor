@@ -8,5 +8,5 @@ public class Pharmacy
     public Pharmacy() { }
     [Key]
     public int PharmacyId { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
 }

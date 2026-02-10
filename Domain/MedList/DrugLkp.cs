@@ -13,7 +13,7 @@ public class DrugLkp
     public DrugLkp() { }
     [Key]
     public int Code { get; set; }
-    public string Generic {  get; set; }
-    public string Brand { get; set; }
-    public string Combined { get; set; }
+    public string? Generic {  get; set; }
+    public string? Brand { get; set; }
+    public string? Combined { get; set; }
 }

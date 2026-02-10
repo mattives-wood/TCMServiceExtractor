@@ -18,11 +18,11 @@ namespace Domain.Services
         public DateTime? InitDate { get; set; }
         public DateTime? TermDate { get; set; }
         [ForeignKey("ClientId")]
-        public Client Client { get; set; }
+        public Client? Client { get; set; }
         [ForeignKey("Program")]
-        public ProgramLkp ProgramLkp { get; set; }
+        public ProgramLkp? ProgramLkp { get; set; }
         [ForeignKey("CaseMgr")]
-        public Employees CaseMgrEmployee { get; set; }
-        public List<Contacts> Contacts { get; set; }
+        public Employees? CaseMgrEmployee { get; set; }
+        public List<Contacts>? Contacts { get; set; }
     }
 }
