@@ -12,6 +12,8 @@ public class FinancialsContext : DbContext
     public static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
     public FinancialsContext(DbContextOptions<FinancialsContext> options) : base(options) { }
 
+    public DbSet<Client> clients { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (Environment.GetEnvironmentVariable("Development") == "true")
@@ -40,6 +42,9 @@ public class FinancialsContext : DbContext
         modelBuilder.HasDbFunction(() => GetServiceLineBalancesForClient(default)).HasName("getServiceLineBalances");
         modelBuilder.Entity<ServiceLineBalance>().HasNoKey();
 
+        modelBuilder.HasDbFunction(() => GetRespPartyForClient(default)).HasName("getRespPartyForClient");
+        modelBuilder.Entity<ResponsibleParty>().HasNoKey();
+
         modelBuilder.HasDbFunction(
             typeof(FinancialsContext).GetMethod(nameof(GetUnbilledCostsForClient),
             new[] { typeof(int) })!)
@@ -65,6 +70,9 @@ public class FinancialsContext : DbContext
 
     public IQueryable<ServiceLineBalance> GetServiceLineBalancesForClient(int clientId) =>
         FromExpression(() => GetServiceLineBalancesForClient(clientId));
+
+    public IQueryable<ResponsibleParty> GetRespPartyForClient(int clientId) =>
+        FromExpression(() => GetRespPartyForClient(clientId));
 
     public static decimal GetUnbilledCostsForClient(int clientId)
         => throw new NotImplementedException();
