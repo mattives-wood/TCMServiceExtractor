@@ -1,6 +1,8 @@
-﻿namespace Domain.Financials;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-public class ResponsibleParty
+namespace Domain.Financials;
+
+    public class ResponsibleParty
 {
     public ResponsibleParty() { }
 
@@ -29,6 +31,8 @@ public class ResponsibleParty
     public string? BillingPhone2 { get; set; }
 
     public string? Comment { get; set; }
+
+    public int RelationshipCode { get; set; }
 
     public string? Relationship { get; set; }
 

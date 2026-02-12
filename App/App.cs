@@ -62,6 +62,43 @@ namespace App
 
         public void Run()
         {
+            int clientId = 117893; //Michael Phelps
+            List<Statement> statements = new();
+
+            Domain.Financials.Client client = _financialsContext.clients.Single(c => c.ClientId == clientId);
+            List<ResponsibleParty> responsibleParties = _financialsContext.GetRespPartyForClient(clientId).ToList();
+            foreach (ResponsibleParty responsibleParty in responsibleParties)
+            {
+                List<Statement> tempStatements = _financialsContext.statements
+                                               .Where(s => s.RespPartyId == responsibleParty.RespPartyId)
+                                               .ToList();
+
+                foreach (Statement statement in tempStatements)
+                {
+                    statement.ResponsibleParty = responsibleParty;
+                }
+
+                statements.AddRange(tempStatements);
+            }
+            
+            foreach (Statement statement in statements)
+            {
+                List<StatementLineItem> statementLineItems = _financialsContext.GetStatementLineItems(statement.StatementId).ToList();
+                foreach (StatementLineItem statementLineItem in statementLineItems)
+                {
+                    statementLineItem.StatementAdjustments = _financialsContext.statementAdjustments
+                                                                               .Where(a => a.ContactKeyId ==
+                                                                                   statementLineItem.ContactId)
+                                                                               .ToList();
+
+                    statementLineItem.StatementPayments = _financialsContext.GetStatementPayments(statementLineItem.StatementId).ToList();
+                }
+                statement.StatementLineItems = statementLineItems;
+            }
+        }
+
+        private void ProcessMedData()
+        {
             List<IMetadata> clients = new List<IMetadata>();
             clients.AddRange(_metadataContext.BH.Where(b => b.BHyn).ToList<IMetadata>());
             clients.AddRange(_metadataContext.BHFS.Where(b => b.BHyn || b.FSyn).ToList<IMetadata>());
@@ -70,14 +107,14 @@ namespace App
 
             foreach (IMetadata client in clients)
             {
-                Process(client);
+                ProcessClient(client);
                 left--;
 
                 // Console.WriteLine(left);
             }
         }
 
-        public void Process(IMetadata metadata)
+        private void ProcessClient(IMetadata metadata)
         {
             ProcessNotes(metadata);
 

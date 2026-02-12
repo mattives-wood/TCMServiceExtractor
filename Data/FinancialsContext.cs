@@ -14,6 +14,16 @@ public class FinancialsContext : DbContext
 
     public DbSet<Client> clients { get; set; }
 
+    public DbSet<ResponsibleParty> responsibleParties { get; set; }
+
+    public DbSet<Statement> statements { get; set; }
+
+    public DbSet<StatementLineItem> statementLineItems { get; set; }
+
+    public DbSet<StatementAdjustment> statementAdjustments { get; set; }
+
+    public DbSet<StatementPayment> statementPayments { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (Environment.GetEnvironmentVariable("Development") == "true")
@@ -45,6 +55,12 @@ public class FinancialsContext : DbContext
         modelBuilder.HasDbFunction(() => GetRespPartyForClient(default)).HasName("getRespPartyForClient");
         modelBuilder.Entity<ResponsibleParty>().HasNoKey();
 
+        modelBuilder.HasDbFunction(() => GetStatementLineItems(default)).HasName("getStatementLineItems");
+        modelBuilder.Entity<StatementLineItem>().HasNoKey();
+
+        modelBuilder.HasDbFunction(() => GetStatementPayments(default)).HasName("getPaymentsForStatement");
+        modelBuilder.Entity<StatementPayment>().HasNoKey();
+
         modelBuilder.HasDbFunction(
             typeof(FinancialsContext).GetMethod(nameof(GetUnbilledCostsForClient),
             new[] { typeof(int) })!)
@@ -73,6 +89,12 @@ public class FinancialsContext : DbContext
 
     public IQueryable<ResponsibleParty> GetRespPartyForClient(int clientId) =>
         FromExpression(() => GetRespPartyForClient(clientId));
+
+    public IQueryable<StatementLineItem> GetStatementLineItems(int statementId) =>
+        FromExpression(() => GetStatementLineItems(statementId));
+
+    public IQueryable<StatementPayment> GetStatementPayments(int statementId) =>
+        FromExpression(() => GetStatementPayments(statementId));
 
     public static decimal GetUnbilledCostsForClient(int clientId)
         => throw new NotImplementedException();

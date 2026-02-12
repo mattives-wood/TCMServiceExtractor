@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Financials;
@@ -9,6 +10,8 @@ public class StatementLineItem
     public StatementLineItem() { }
 
     public int ServiceLineId { get; set; }
+
+    public int ContactId { get; set; }
 
     public int ClientId {  get; set; }
 
@@ -27,4 +30,10 @@ public class StatementLineItem
     public decimal Cost { get; set; }
 
     public string? Description { get; set; }
+
+    [NotMapped]
+    public List<StatementAdjustment> StatementAdjustments { get; set; }
+
+    [NotMapped]
+    public List<StatementPayment> StatementPayments { get; set; }
 }

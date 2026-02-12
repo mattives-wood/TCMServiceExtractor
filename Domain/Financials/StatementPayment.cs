@@ -14,7 +14,7 @@ public class StatementPayment
 
     public decimal AllocatedAmount { get; set; }
 
-    public int StatementId { get; set; }  //Match on this for each statement
+    public int StatementId { get; set; }
 
 
     //Discount?
